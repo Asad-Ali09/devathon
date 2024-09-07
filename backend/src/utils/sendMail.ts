@@ -61,3 +61,102 @@ export const sendSignupVerificationCodeMail = (
 
   return isMailSent;
 };
+
+export const sendAppointmentEmailForPateint = (
+  email: string,
+  doctorName: string,
+  day: string,
+  startTime: Date,
+  endTime: Date,
+  date: Date
+): Promise<boolean> => {
+  // Format dates for readability
+  const formattedStartTime = startTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const formattedEndTime = endTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const formattedDate = date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  // Construct the email message
+  const message = `Dear Patient,
+
+Your appointment has been successfully booked with Dr. ${doctorName}.
+
+Details:
+- Date: ${formattedDate}
+- Day: ${day}
+- Time: ${formattedStartTime} to ${formattedEndTime}
+
+Thank you for using our services.
+
+Best regards,
+Your Clinic`;
+
+  // Send the email
+  const isMailSent = sendMail({
+    subject: "Appointment Booked",
+    send_to: email,
+    message: message,
+  });
+
+  return isMailSent;
+};
+
+export const sendAppointmentEmailForDoctor = (
+  email: string,
+  patientName: string,
+  day: string,
+  startTime: Date,
+  endTime: Date,
+  date: Date
+): Promise<boolean> => {
+  // Format dates for readability
+  const formattedStartTime = startTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const formattedEndTime = endTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const formattedDate = date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  // Construct the email message
+  const message = `Dear Doctor,
+
+An appointment has been booked with you.
+
+Details:
+- Patient: ${patientName}
+- Date: ${formattedDate}
+- Day: ${day}
+- Time: ${formattedStartTime} to ${formattedEndTime}
+
+Please make sure to be available at the specified time.
+
+Thank you for your attention.
+
+Best regards,
+Your Clinic`;
+
+  // Send the email
+  const isMailSent = sendMail({
+    subject: "New Appointment Booked",
+    send_to: email,
+    message: message,
+  });
+
+  return isMailSent;
+};

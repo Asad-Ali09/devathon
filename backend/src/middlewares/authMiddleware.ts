@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import customError from "../utils/customError";
 import { UserModel } from "../models/user.model";
 import { TokenType } from "../types/authTypes";
+import { Role } from "../types";
 
 const authMiddleware = async (
   req: Request,
@@ -49,7 +50,7 @@ const authMiddlewareForVerification = async (
   next();
 };
 
-const roleMiddleware = (roles: string[]) => {
+const roleMiddleware = (roles: Role[]) => {
   return (req: Request, _: Response, next: NextFunction) => {
     const user = req.user;
     if (!user) {

@@ -4,6 +4,10 @@ import { UserModel } from "../models/user.model";
 import { Doctor } from "../types";
 import AppointmentModel from "../models/appointment.model";
 import { BookAppointmentRequest } from "../types/appointmentTypes";
+import {
+  sendAppointmentEmailForDoctor,
+  sendAppointmentEmailForPateint,
+} from "../utils/sendMail";
 
 const isDoctorAvailable = (
   doctor: Doctor,
@@ -131,6 +135,28 @@ const bookAppointment = async (
   });
 
   await newAppointment.save();
+  const appointmentDay = appointmentDate.toLocaleDateString("en-US", {
+    weekday: "long",
+  });
+
+  await Promise.all([
+    sendAppointmentEmailForDoctor(
+      doctor.email,
+      user.name,
+      appointmentDay,
+      appointmentStartTime,
+      appointmentEndTime,
+      appointmentDate
+    ),
+    sendAppointmentEmailForPateint(
+      user.email,
+      doctor.name,
+      appointmentDay,
+      appointmentStartTime,
+      appointmentEndTime,
+      appointmentDate
+    ),
+  ]);
 
   res.status(201).json({
     message: "Appointment booked successfully.",
@@ -138,7 +164,37 @@ const bookAppointment = async (
   });
 };
 
+const getMyAppointments = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const userId = req.user._id; // Assuming user ID is available from authentication middleware
+  const userRole = req.user.role; // Assuming user role is available from authentication middleware
+
+  if (!userId || !userRole) {
+    throw new customError(400, "User ID or role not found");
+  }
+
+  let appointments;
+
+  if (userRole === "patient") {
+    appointments = await AppointmentModel.find({ patient: userId })
+      .populate("doctor", "name email") // Populating doctor details
+      .exec();
+  } else if (userRole === "doctor") {
+    // If the user is a doctor, find appointments where the user is the doctor
+    appointments = await AppointmentModel.find({ doctor: userId })
+      .populate("patient", "name email") // Populating patient details
+      .exec();
+  } else {
+    throw new customError(403, "Access forbidden");
+  }
+
+  return res.status(200).json({ appointments });
+};
+
 const appointmentControllers = {
   bookAppointment,
+  getMyAppointments,
 };
 export default appointmentControllers;
