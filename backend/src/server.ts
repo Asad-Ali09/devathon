@@ -9,6 +9,7 @@ import apiRoutes from "./routes";
 import errorHandler from "./middlewares/errorHandler";
 import notFound from "./middlewares/notFound";
 import { User } from "./types";
+import cors from "cors";
 
 declare module "express-serve-static-core" {
   export interface Request {
@@ -16,7 +17,12 @@ declare module "express-serve-static-core" {
   }
 }
 const app = express();
-
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

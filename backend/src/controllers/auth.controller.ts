@@ -124,12 +124,13 @@ const signUp = withTransaction(
       email,
       verificationCode
     );
+    const { password: hashedPassword, ...responseUser } = newPatient.toObject();
 
     // Respond to the client
     if (isMailSent === true)
       return res.status(200).json({
         message: "Please Check you email for verification code",
-        data: { name, email },
+        data: responseUser,
       });
     else throw new customError(500, "Error sending verification code");
   }
