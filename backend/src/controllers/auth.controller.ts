@@ -3,9 +3,10 @@ import jwt from "jsonwebtoken";
 import { ClientSession } from "mongoose";
 import { jwtConfig } from "../config";
 import withTransaction from "../middlewares/transactionWrapper";
-import { UserModel } from "../models/user.model";
+import { DoctorModel, UserModel } from "../models/user.model";
 import verficationModel from "../models/verfication.model";
 import {
+  DoctorSignUpRequest,
   ManualLoginRequest,
   ManualSignUpRequest,
   TokenType,
@@ -252,9 +253,79 @@ const isLoggedIn = async (req: Request, res: Response) => {
   return res.status(200).json(responseUser);
 };
 
-// const registerDoctor = () => {
+const registerDoctor = async (
+  req: Request<{}, {}, DoctorSignUpRequest>,
+  res: Response
+) => {
+  const {
+    name,
+    email,
+    password,
+    contactNumber,
+    address,
+    dob,
+    gender,
+    specializations,
+    exp,
+    description,
+    timeSlots,
+  } = req.body;
 
-// }
+  // Validate required fields
+  if (
+    !name ||
+    !email ||
+    !password ||
+    !contactNumber ||
+    !dob ||
+    !address ||
+    !gender ||
+    !specializations ||
+    !exp ||
+    !description ||
+    !timeSlots
+  ) {
+    throw new customError(400, "Please provide all required fields");
+  }
+
+  // Check if the doctor already exists by email
+  const existingUser = await UserModel.findOne({ email });
+  if (existingUser) {
+    throw new customError(400, "User with this email already exists");
+  }
+
+  // Create a new doctor instance
+  const newDoctor = new DoctorModel({
+    name,
+    email,
+    password,
+    contact: contactNumber,
+    address,
+    dob,
+    gender,
+    isVerified: true,
+    role: "doctor", // Set role as doctor
+    specializations,
+    exp,
+    description,
+    timeSlots,
+  });
+
+  // Save the new doctor in the database
+  await newDoctor.save();
+
+  // Generate JWT token
+  const token = await newDoctor.createJWT();
+
+  // Set the JWT token as a cookie
+  res.cookie("token", token, cookieOptions);
+
+  let { password: hashedPassword, ...responseUser } = newDoctor.toObject();
+
+  return res
+    .status(201)
+    .json({ message: "Doctor registered successfully", user: responseUser });
+};
 
 const authControllers = {
   signUp,
@@ -263,5 +334,6 @@ const authControllers = {
   login,
   logout,
   isLoggedIn,
+  registerDoctor,
 };
 export default authControllers;

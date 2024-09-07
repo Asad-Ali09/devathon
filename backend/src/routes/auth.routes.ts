@@ -16,6 +16,8 @@ router
 
 router.route("/").post(authControllers.login).get(authControllers.logout);
 
-router.route("isloggedin").get(authControllers.isLoggedIn);
+router.route("/isloggedin").get(authControllers.isLoggedIn);
+
+router.route("/registerdoctor").post(authControllers.registerDoctor);
 
 export default router;

@@ -13,11 +13,11 @@ export interface ManualSignUpRequest {
 export interface DoctorSignUpRequest extends ManualSignUpRequest {
   specializations: string[];
   exp: number;
-  qualification: string;
+  description: string;
   timeSlots: {
     day: string; // "Monday", "Tuesday", etc.
-    startTime: string; // Time format "HH:mm"
-    endTime: string; // Time format "HH:mm"
+    startTime: Date; // Time format "HH:mm"
+    endTime: Date; // Time format "HH:mm"
   }[];
 }
 
