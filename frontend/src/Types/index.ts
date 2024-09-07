@@ -3,5 +3,16 @@ export type User = {
   email: string;
   password?: string;
   image: string | null | File;
-  googleAccessToken?: string;
+  contactNumber: string;
+  dob: string;
+  address: string;
+  gender: string;
+};
+
+// Doctor-specific fields
+export type Doctor = User & {
+  experience: string;
+  timing: string; // appointment timings
+  qualification: string;
+  specialization: string;
 };

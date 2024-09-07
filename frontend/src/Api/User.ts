@@ -14,3 +14,11 @@ export const googleSignUpCall = async (googleAccessToken: string) => {
   });
   return response.data;
 };
+
+
+export const signInCall = async () => {
+  // Your sign-in logic here
+  // For example, you can use axios to make a POST request to your API
+  // const response = await axios.post("/api/auth/signin", data);
+  // return response.data;
+};
