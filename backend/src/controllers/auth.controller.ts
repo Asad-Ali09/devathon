@@ -327,6 +327,39 @@ const registerDoctor = async (
     .json({ message: "Doctor registered successfully", user: responseUser });
 };
 
+export const createAdminAccount = async () => {
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@gmail.com";
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin1234";
+
+  if (!adminEmail || !adminPassword) {
+    throw new customError(
+      500,
+      "Admin email or password is not defined in environment variables."
+    );
+  }
+
+  const existingAdmin = await UserModel.findOne({ email: adminEmail });
+  if (existingAdmin) {
+    console.log("Admin account already exists.");
+    return;
+  }
+
+  const newAdmin = new UserModel({
+    name: "Admin",
+    email: adminEmail,
+    password: adminPassword,
+    contact: "12345678901",
+    address: "Admin Office",
+    gender: "other",
+    isVerified: true,
+    role: "admin",
+    dob: new Date(),
+  });
+
+  await newAdmin.save();
+  console.log("Admin account created successfully.");
+};
+createAdminAccount();
 const authControllers = {
   signUp,
   requestNewVerificationCode,
