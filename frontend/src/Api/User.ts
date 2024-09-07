@@ -1,6 +1,7 @@
 import axios from "axios";
 import uploadImageToCloudinary from "../Api/imageUpload";
 import { User } from "../Types/index";
+import toast from "react-hot-toast";
 
 export const signUpCall = async (data: User) => {
   if (data.image && typeof data.image != "string") {
@@ -13,4 +14,12 @@ export const googleSignUpCall = async (googleAccessToken: string) => {
     googleAccessToken,
   });
   return response.data;
+};
+
+export const TwoStepCall = async (OTP: string) => {
+  console.log(OTP);
+  const response = await axios.post("/", {
+    OTP: OTP,
+  });
+  return response?.data;
 };

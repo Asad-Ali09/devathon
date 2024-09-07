@@ -1,7 +1,10 @@
 export type User = {
-  userName: string;
+  name: string;
   email: string;
   password?: string;
-  image: string | null | File;
-  googleAccessToken?: string;
+  imageUrl?: string | null | File;
+  contactNumber: string;
+  dob: string;
+  address: string;
+  gender: string;
 };
