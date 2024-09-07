@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Typography, Input, Button } from "@material-tailwind/react";
+import { Typography, Input, Button, useSelect } from "@material-tailwind/react";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/solid";
 import { User } from "../Types/index";
-import { signUpCall, googleSignUpCall } from "../Redux/Api/User";
+import { signUpCall } from "../Redux/Api/User";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { GoogleLogin } from "@react-oauth/google";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../Redux/store";
+// import { GoogleLogin } from "@react-oauth/google";
 
 // Zod schema for form validation
 // Zod schema for form validation
@@ -33,6 +35,15 @@ export function SignUp() {
   const [image, setImage] = useState<File | null>(null);
   const navigate = useNavigate();
   const togglePasswordVisibility = () => setPasswordShown((cur) => !cur);
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useSelector<RootState>((state) => state.user);
+  const { isLoggedIn } = useSelector<RootState>((state) => state.user);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/two-step");
+    }
+  }, [isLoggedIn]);
 
   const {
     register,
@@ -56,43 +67,51 @@ export function SignUp() {
     //   toast.error("There was an error submitting the form", { id: toastId });
     // }
     console.log(dataWithImage);
-  };
+    const responsedata = await dispatch(signUpCall(dataWithImage));
 
-  const mutation = useMutation({
-    mutationFn: signUpCall,
-    onSuccess: () => {
-      console.log("Form submitted successfully");
-      navigate("/login");
-    },
-    onError: () => {
-      console.log("There is an error right now");
-    },
-  });
-
-  const googleMutation = useMutation({
-    mutationFn: googleSignUpCall,
-    onSuccess: () => {
-      console.log("Google sign-up successful");
-      toast.success("Signed up successfully");
-      navigate("/login");
-    },
-    onError: () => {
-      console.log("Error during Google sign-up");
-      toast.error("Error signing up");
-    },
-  });
-
-  const handleGoogleSignIn = async (response: { credential: string }) => {
-    const toastId = toast.loading("Signing you up...");
-    console.log(response);
-    try {
-      await googleMutation.mutateAsync(response.credential);
+    if (responsedata.payload.status == 200) {
       toast.success("Signed up successfully", { id: toastId });
       navigate("/two-step");
-    } catch (error: any) {
-      toast.error("Error signing up", { id: toastId });
+    } else {
+      toast.error(responsedata.payload.response.data.message);
     }
   };
+
+  // const mutation = useMutation({
+  //   mutationFn: signUpCall,
+  //   onSuccess: () => {
+  //     console.log("Form submitted successfully");
+  //     navigate("/login");
+  //   },
+  //   onError: () => {
+  //     console.log("There is an error right now");
+  //   },
+  // });
+
+  // const googleMutation = useMutation({
+  //   mutationFn: googleSignUpCall,
+  //   onSuccess: () => {
+  //     console.log("Google sign-up successful");
+  //     toast.success("Signed up successfully");
+  //     navigate("/login");
+  //   },
+  //   onError: () => {
+  //     console.log("Error during Google sign-up");
+  //     toast.error("Error signing up");
+  //   },
+  // });
+
+  // const handleGoogleSignIn = async (response: { credential: string }) => {
+  //   const toastId = toast.loading("Signing you up...");
+  //   console.log(response);
+  //   try {
+  //     await googleMutation.mutateAsync(response.credential);
+  //     toast.success("Signed up successfully", { id: toastId });
+  //     navigate("/two-step");
+  //   } catch (error: any) {
+  //     toast.error("Error signing up", { id: toastId });
+  //   }
+  // };
 
   return (
     <section className="grid text-center h-screen items-center mt-10">

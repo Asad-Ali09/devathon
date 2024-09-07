@@ -1,24 +1,22 @@
 // src/redux/userSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { signUpCall, signInCall, TwoStepCall, getDoctors } from "./Api/User";
-import { User } from "../Types/index";
+import { Doctor, User } from "../Types/index";
+import { getDoctors, signUpCall } from "./Api/User";
 
 interface UserState {
-  user?: User;
-  doctors: any[]; // Adjust the type according to your API response
+  doctors: Doctor[];
   loading: boolean;
+  user: User | null;
   error?: string;
-  signUpStatus?: string;
-  signInStatus?: string;
+  isLoggedIn: boolean;
 }
 
 const initialState: UserState = {
-  user: undefined,
   doctors: [],
   loading: false,
+  user: null,
   error: undefined,
-  signUpStatus: undefined,
-  signInStatus: undefined,
+  isLoggedIn: false,
 };
 
 const userSlice = createSlice({
@@ -27,43 +25,33 @@ const userSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Sign In
-      .addCase(signInCall.pending, (state) => {
-        state.loading = true;
-        state.signInStatus = "loading";
-      })
-      .addCase(signInCall.fulfilled, (state, action: PayloadAction<User>) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.signInStatus = "succeeded";
-      })
-      .addCase(signInCall.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-        state.signInStatus = "failed";
-      })
-      // Two-Step Verification
-      .addCase(TwoStepCall.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(TwoStepCall.fulfilled, (state, action) => {
-        state.loading = false;
-      })
-      .addCase(TwoStepCall.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      // Get Doctors
       .addCase(getDoctors.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getDoctors.fulfilled, (state, action: PayloadAction<any[]>) => {
-        state.loading = false;
-        state.doctors = action.payload;
-      })
+      .addCase(
+        getDoctors.fulfilled,
+        (state, action: PayloadAction<Doctor[]>) => {
+          state.loading = false;
+          state.doctors = action.payload;
+        }
+      )
       .addCase(getDoctors.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        // Ensure error is extracted properly
+        state.error = action.error.message || "Failed to fetch doctors";
+      })
+      .addCase(signUpCall.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(signUpCall.fulfilled, (state, action: PayloadAction<User>) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.isLoggedIn = true;
+      })
+      .addCase(signUpCall.rejected, (state, action) => {
+        state.loading = false;
+        // Ensure error is extracted properly
+        state.error = action.error.message || "Failed to sign up";
       });
   },
 });

@@ -1,19 +1,24 @@
 import React, { FormEvent, useState } from "react";
 import { Input, Button } from "@material-tailwind/react";
 import { Typography } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TwoStepCall } from "../Redux/Api/User";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../Redux/store";
 
 const TwoStep = () => {
   const [OTP, setOTP] = useState(""); // OTP should be a string to handle input properly
-
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const toastId = toast.loading("Verifying...");
-    const response = await TwoStepCall(OTP);
-    if (response?.ok) {
+    const response = await dispatch(TwoStepCall(OTP));
+    console.log(response);
+    if (response.payload.status === 200) {
       toast.success("Verified", { id: toastId });
+      navigate("/login");
     } else {
       toast.error("Error Verifying you", { id: toastId });
     }

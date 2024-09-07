@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,6 +9,8 @@ import { loginType, User } from "../Types/index";
 import { signInCall } from "../Redux/Api/User"; // Replace with your sign-in API call
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../Redux/store";
 
 // Zod schema for form validation
 const schema = z.object({
@@ -20,6 +22,14 @@ const Login = () => {
   const [passwordShown, setPasswordShown] = useState(false);
   const navigate = useNavigate();
   const togglePasswordVisibility = () => setPasswordShown((cur) => !cur);
+  const dispatch = useDispatch<AppDispatch>();
+  const { isLoggedIn } = useSelector<RootState>((state) => state.user);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/");
+    }
+  }, [isLoggedIn]);
 
   const {
     register,
@@ -53,7 +63,10 @@ const Login = () => {
       // }
       // if()
       // TwoStepCall();
-      navigate("/two-factor");
+      // navigate("/two-factor");
+      dispatch(
+        signInCall({ email: data.email, password: data.password || "" })
+      );
     } catch (error: any) {
       toast.error("There was an error logging in", { id: toastId });
     }

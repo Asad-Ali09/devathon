@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   List,
   ListItem,
@@ -10,59 +11,62 @@ import {
   Button,
 } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
-
-const doctors = [
-  {
-    name: "Rehan",
-    email: "rehanshafqat2004@gmail.com",
-    imageUrl: null,
-    specializations: ["Cardiology", "Internal Medicine"],
-    exp: 10,
-    description:
-      "Experienced cardiologist with a decade of practice in internal medicine.",
-    timeSlots: [
-      {
-        day: "Monday",
-        startTime: "2024-09-04T09:00:00.000Z",
-        endTime: "2024-09-04T17:00:00.000Z",
-      },
-      {
-        day: "Wednesday",
-        startTime: "2024-09-06T10:00:00.000Z",
-        endTime: "2024-09-06T15:00:00.000Z",
-      },
-      {
-        day: "Friday",
-        startTime: "2024-09-08T08:00:00.000Z",
-        endTime: "2024-09-08T14:00:00.000Z",
-      },
-    ],
-  },
-  // Add more doctor objects as needed
-];
+import { getDoctors } from "../Redux/Api/User";
+import { AppDispatch, RootState } from "../Redux/store";
+import { Doctor } from "../Types";
 
 export function DoctorList() {
+  const dispatch = useDispatch<AppDispatch>();
+  const {
+    doctors = [],
+    loading,
+    error,
+  } = useSelector((state: RootState) => state.user);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredDoctors, setFilteredDoctors] = useState(doctors);
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
 
-  // Filter doctors based on the search query
+  useEffect(() => {
+    dispatch(getDoctors());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (Array.isArray(doctors)) {
+      setFilteredDoctors(
+        doctors.filter(
+          (doctor) =>
+            doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doctor.specialization
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredDoctors([]); // Clear filtered doctors if doctors is not an array
+    }
+  }, [searchQuery, doctors]);
+
   const handleSearch = () => {
-    setFilteredDoctors(
-      doctors.filter(
-        (doctor) =>
-          doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          doctor.specializations.some((spec) =>
-            spec.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-      )
-    );
+    if (Array.isArray(doctors)) {
+      setFilteredDoctors(
+        doctors.filter(
+          (doctor) =>
+            doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doctor.specialization
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+        )
+      );
+    }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSearch();
     }
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="p-6">
@@ -76,9 +80,7 @@ export function DoctorList() {
       <div className="mb-4 flex items-center">
         <Input
           type="text"
-          labelProps={{
-            className: "hidden",
-          }}
+          labelProps={{ className: "hidden" }}
           placeholder="Search by name or specialization..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -104,7 +106,7 @@ export function DoctorList() {
                   <Avatar
                     variant="circular"
                     alt={doctor.name}
-                    src={doctor.imageUrl || "https://via.placeholder.com/150"}
+                    src={doctor.imageUrl || "h  ttps://via.placeholder.com/150"}
                     className="w-16 h-16"
                   />
                 </ListItemPrefix>
@@ -121,7 +123,7 @@ export function DoctorList() {
                     color="gray"
                     className="font-normal mb-1"
                   >
-                    {doctor.specializations.join(", ")}
+                    {doctor.specialization}
                   </Typography>
                   <Link
                     to={`/doctor/${index}`}

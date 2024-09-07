@@ -12,6 +12,7 @@ const uploadImageToCloudinary = async (file: File): Promise<string | null> => {
       }/image/upload`,
       formData,
       {
+        withCredentials: false,
         headers: {
           "Content-Type": "multipart/form-data",
         },
