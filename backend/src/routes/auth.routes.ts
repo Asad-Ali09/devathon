@@ -2,6 +2,7 @@ import { Router } from "express";
 import authControllers from "../controllers/auth.controller";
 import authMiddleware, {
   authMiddlewareForVerification,
+  roleMiddleware,
 } from "../middlewares/authMiddleware";
 const router = Router();
 
@@ -18,6 +19,12 @@ router.route("/").post(authControllers.login).get(authControllers.logout);
 
 router.route("/isloggedin").get(authControllers.isLoggedIn);
 
-router.route("/registerdoctor").post(authControllers.registerDoctor);
+router
+  .route("/registerdoctor")
+  .post(
+    authMiddleware,
+    roleMiddleware(["admin"]),
+    authControllers.registerDoctor
+  );
 
 export default router;

@@ -38,3 +38,13 @@ export interface Verification extends Document {
   code: string;
   createdAt: Date;
 }
+
+export interface Appointment extends Document {
+  doctor: Schema.Types.ObjectId;
+  patient: Schema.Types.ObjectId;
+  timeSlot: {
+    date: Date;
+    startTime: Date; // Start time of the appointment
+    endTime: Date; // End time of the appointment
+  };
+}

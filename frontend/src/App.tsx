@@ -3,6 +3,7 @@ import SignUp from "./Pages/SignUp";
 import Login from "./Pages/Login";
 import TwoStep from "./Pages/TwoStep";
 import AddDoctor from "./admin/addDoctor";
+import { DoctorList } from "./Pages/DoctorsList";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
 
           <Route path="/two-step" element={<TwoStep />}></Route>
           <Route path="/add/doctor" element={<AddDoctor />}></Route>
+          <Route path="/doctors/list" element={<DoctorList />}></Route>
         </Routes>
       </Router>
     </div>

@@ -2,7 +2,7 @@ import React, { FormEvent, useState } from "react";
 import { Input, Button } from "@material-tailwind/react";
 import { Typography } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
-import { TwoStepCall } from "../Api/User";
+import { TwoStepCall } from "../Redux/Api/User";
 import toast from "react-hot-toast";
 
 const TwoStep = () => {
