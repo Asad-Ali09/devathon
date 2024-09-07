@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import customError from "../utils/customError";
-import UserModel from "../models/user.model";
+import { UserModel } from "../models/user.model";
 import { TokenType } from "../types/authTypes";
 
 const authMiddleware = async (

@@ -12,7 +12,7 @@ router
     authMiddlewareForVerification,
     authControllers.requestNewVerificationCode
   )
-  .post(authMiddleware, authControllers.verifyUser);
+  .post(authMiddlewareForVerification, authControllers.verifyUser);
 
 router.route("/").post(authControllers.login).get(authControllers.logout);
 

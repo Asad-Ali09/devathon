@@ -45,12 +45,12 @@ export const sendSignupVerificationCodeMail = (
   email: string,
   code: number
 ): Promise<boolean> => {
-  const dev = true;
-  if (dev) {
-    return new Promise<true>((resolve, reject) => {
-      resolve(true);
-    });
-  }
+  // const dev = true;
+  // if (dev) {
+  //   return new Promise<true>((resolve, reject) => {
+  //     resolve(true);
+  //   });
+  // }
 
   const isMailSent = sendMail({
     subject: "Verify your email",

@@ -1,8 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignUp from "./Pages/SignUp";
 import Login from "./Pages/Login";
-// import DashboardAdmin from "./admin/dashboardAdmin"; // Corrected import statement
-
+import TwoStep from "./Pages/TwoStep";
 
 const App = () => {
   return (
@@ -14,6 +13,7 @@ const App = () => {
 
           {/* <Route path="/admin/dashboard" element={<DashboardAdmin />}></Route>  */}
 
+          <Route path="/two-step" element={<TwoStep />}></Route>
         </Routes>
       </Router>
     </div>

@@ -1,14 +1,11 @@
-import axios from "axios";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { ClientSession } from "mongoose";
 import { jwtConfig } from "../config";
 import withTransaction from "../middlewares/transactionWrapper";
-import UserModel from "../models/user.model";
+import { UserModel } from "../models/user.model";
 import verficationModel from "../models/verfication.model";
 import {
-  GoogleAuthResponse,
-  GoogleSignUpLoginRequest,
   ManualLoginRequest,
   ManualSignUpRequest,
   TokenType,
@@ -17,49 +14,68 @@ import { cookieOptions, generate6DigitCode } from "../utils/auth.utils";
 import customError from "../utils/customError";
 import { sendSignupVerificationCodeMail } from "../utils/sendMail";
 
-const getGoogleAccountDetails = async (googleAccessToken: string) => {
-  const response = await axios.get<GoogleAuthResponse>(
-    "https://www.googleapis.com/oauth2/v3/userinfo",
-    {
-      headers: {
-        Authorization: `Bearer ${googleAccessToken}`,
-      },
-    }
-  );
+// const getGoogleAccountDetails = async (googleAccessToken: string) => {
+//   const response = await axios.get<GoogleAuthResponse>(
+//     "https://www.googleapis.com/oauth2/v3/userinfo",
+//     {
+//       headers: {
+//         Authorization: `Bearer ${googleAccessToken}`,
+//       },
+//     }
+//   );
 
-  return {
-    name: `${response.data.given_name} ${response.data.family_name}`,
-    email: response.data.email,
-  };
-};
+//   return {
+//     name: `${response.data.given_name} ${response.data.family_name}`,
+//     email: response.data.email,
+//   };
+// };
 
-type SignUpRequestType =
-  | Request<{}, {}, ManualSignUpRequest>
-  | Request<{}, {}, GoogleSignUpLoginRequest>;
+// type SignUpRequestType =
+//   | Request<{}, {}, ManualSignUpRequest>
+//   | Request<{}, {}, GoogleSignUpLoginRequest>;
 
-const isGoogleSignUpRequest = (
-  req: SignUpRequestType
-): req is Request<{}, {}, GoogleSignUpLoginRequest> => {
-  return "googleAccessToken" in req.body;
-};
+// const isGoogleSignUpRequest = (
+//   req: SignUpRequestType
+// ): req is Request<{}, {}, GoogleSignUpLoginRequest> => {
+//   return "googleAccessToken" in req.body;
+// };
 
 const signUp = withTransaction(
-  async (req: SignUpRequestType, res: Response, session: ClientSession) => {
-    let name = "",
-      email = "",
-      password = "";
-    if (isGoogleSignUpRequest(req)) {
-      const userDetails = await getGoogleAccountDetails(
-        req.body.googleAccessToken
-      );
-      name = userDetails.name;
-      email = userDetails.email;
-    } else {
-      name = req.body.name;
-      email = req.body.email;
-      password = req.body.password;
-      if (!name || !email || !password)
-        throw new customError(400, "Invalid email or password");
+  async (
+    req: Request<{}, {}, ManualSignUpRequest>,
+    res: Response,
+    session: ClientSession
+  ) => {
+    // let name = "",
+    //   email = "",
+    //   password = "";
+    // if (isGoogleSignUpRequest(req)) {
+    //   const userDetails = await getGoogleAccountDetails(
+    //     req.body.googleAccessToken
+    //   );
+    //   name = userDetails.name;
+    //   email = userDetails.email;
+    // } else {
+    //   name = req.body.name;
+    //   email = req.body.email;
+    //   password = req.body.password;
+    //   if (!name || !email || !password)
+    //     throw new customError(400, "Invalid email or password");
+    // }
+
+    const { name, email, address, contactNumber, dob, gender, password } =
+      req.body;
+
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !contactNumber ||
+      !dob ||
+      !address ||
+      !gender
+    ) {
+      throw new customError(400, "Please provide all required fields");
     }
 
     const existingUser = await UserModel.findOne({ email });
@@ -67,31 +83,37 @@ const signUp = withTransaction(
       throw new customError(400, "User already exists");
     }
 
-    let newUser = new UserModel({
+    let newPatient = new UserModel({
       name,
       email,
-      ...(isGoogleSignUpRequest(req) ? { isVerified: true } : { password }),
+      password,
+      contact: contactNumber,
+      address,
+      gender,
+      dob,
+      isVerified: false,
+      role: "patient",
     });
 
-    await newUser.save({ session });
+    await newPatient.save({ session });
 
-    const token = await newUser.createJWT();
+    const token = await newPatient.createJWT();
 
     res.cookie("token", token, cookieOptions);
 
-    if (isGoogleSignUpRequest(req)) {
-      return res.status(201).json({
-        message: "Please Check you email for verification code",
-        data: { name, email },
-      });
-    }
+    // if (isGoogleSignUpRequest(req)) {
+    //   return res.status(201).json({
+    //     message: "Please Check you email for verification code",
+    //     data: { name, email },
+    //   });
+    // }
 
     // Generate a verification code
     const verificationCode = generate6DigitCode();
 
     // Save the verification code to the DB
     const newVerificationCode = new verficationModel({
-      userId: newUser._id,
+      userId: newPatient._id,
       code: verificationCode,
     });
     await newVerificationCode.save({ session });
@@ -160,36 +182,43 @@ const verifyUser = async (
 };
 
 const login = async (
-  req: Request<{}, {}, ManualLoginRequest | GoogleSignUpLoginRequest>,
+  req: Request<{}, {}, ManualLoginRequest>,
   res: Response
 ) => {
-  let email = "",
-    password = "";
-  if ("googleAccessToken" in req.body) {
-    const userDetails = await getGoogleAccountDetails(
-      req.body.googleAccessToken
-    );
-    email = userDetails.email;
-  } else {
-    email = req.body.email;
-    password = req.body.password;
-    if (!password || !email) {
-      throw new customError(400, "Invalid Credentials");
-    }
+  // let email = "",
+  //   password = "";
+  // if ("googleAccessToken" in req.body) {
+  //   const userDetails = await getGoogleAccountDetails(
+  //     req.body.googleAccessToken
+  //   );
+  //   email = userDetails.email;
+  // } else {
+  //   email = req.body.email;
+  //   password = req.body.password;
+  //   if (!password || !email) {
+  //     throw new customError(400, "Invalid Credentials");
+  //   }
+  // }
+
+  const { email, password } = req.body;
+
+  // Validate required fields
+  if (!email || !password) {
+    throw new customError(400, "Please provide email and password");
   }
 
   const user = await UserModel.findOne({ email });
   if (!user) {
-    throw new customError(404, "Invalid Email. User not found");
+    throw new customError(401, "Invalid credentials");
   }
 
-  if (!("googleAccessToken" in req.body)) {
-    const isMatched = await user.comparePassword(password);
+  const isMatched = await user.comparePassword(password);
 
-    if (!isMatched) {
-      throw new customError(400, "Invalid Credentials");
-    }
+  if (!isMatched) {
+    throw new customError(400, "Invalid Credentials");
   }
+  // if (!("googleAccessToken" in req.body)) {
+  // }
 
   const token = user.createJWT();
   res.cookie("token", token, cookieOptions);
@@ -201,7 +230,7 @@ const login = async (
     .json({ message: "Logged In Successfully", data: responseUser });
 };
 
-const logout = async (req: Request, res: Response) => {
+const logout = async (_: Request, res: Response) => {
   res.clearCookie("token", cookieOptions);
   res.status(200).json({ message: "Logged Out Successfully" });
 };
@@ -222,6 +251,10 @@ const isLoggedIn = async (req: Request, res: Response) => {
   const { password, ...responseUser } = user.toObject();
   return res.status(200).json(responseUser);
 };
+
+// const registerDoctor = () => {
+
+// }
 
 const authControllers = {
   signUp,

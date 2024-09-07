@@ -1,8 +1,8 @@
 export type User = {
-  userName: string;
+  name: string;
   email: string;
   password?: string;
-  image: string | null | File;
+  imageUrl?: string | null | File;
   contactNumber: string;
   dob: string;
   address: string;
