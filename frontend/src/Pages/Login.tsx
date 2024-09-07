@@ -5,14 +5,14 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography, Input, Button } from "@material-tailwind/react";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/solid";
-import { User } from "../Types/index";
+import { loginType, User } from "../Types/index";
 import { signInCall } from "../Api/User"; // Replace with your sign-in API call
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 // Zod schema for form validation
 const schema = z.object({
-  usernameOrEmail: z.string().min(1, "Username or Email is required"),
+  email: z.string().min(1, "Username or Email is required"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
@@ -25,7 +25,7 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<User>({
+  } = useForm<loginType>({
     resolver: zodResolver(schema),
   });
 
@@ -41,23 +41,24 @@ const Login = () => {
 
     try {
       const response = await mutation.mutateAsync(data);
-
       // Assuming `response.data` contains user information, including role
       const userRole = response.data.role; // role can be doctor or patient
 
       toast.success("Logged in successfully", { id: toastId });
 
-      if (userRole === "doctor") {
-        navigate("/doctor-dashboard"); // Navigate to the doctor dashboard
-      } else if (userRole === "patient") {
-        navigate("/patient-dashboard"); // Navigate to the patient dashboard
-      }
+      // if (userRole === "doctor") {
+      //   navigate("/doctor-dashboard"); // Navigate to the doctor dashboard
+      // } else if (userRole === "patient") {
+      //   navigate("/patient-dashboard"); // Navigate to the patient dashboard
+      // }
+      // if()
+      // TwoStepCall();
+      navigate("/two-factor");
     } catch (error: any) {
       toast.error("There was an error logging in", { id: toastId });
     }
   };
 
-  
   return (
     <section className="grid text-center h-screen items-center p-8">
       <div>
@@ -73,28 +74,28 @@ const Login = () => {
         >
           {/* Username or Email Field */}
           <div className="mb-4">
-            <label htmlFor="usernameOrEmail">
+            <label htmlFor="email">
               <Typography
                 variant="small"
                 className="mb-2 block font-medium text-gray-900"
               >
-                Username or Email
+                Email
               </Typography>
             </label>
             <Input
               labelProps={{
                 className: "hidden",
               }}
-              {...register("usernameOrEmail")}
-              name="usernameOrEmail"
+              {...register("email")}
+              name="email"
               type="text"
               size="lg"
               placeholder="Username or Email"
               className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 placeholder:opacity-100 focus:!border-gray-900 focus:ring-gray-900/10"
             />
-            {errors.usernameOrEmail && (
+            {errors.email && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.usernameOrEmail.message}
+                {errors.email.message}
               </p>
             )}
           </div>
