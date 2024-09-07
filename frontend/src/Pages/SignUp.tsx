@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography, Input, Button } from "@material-tailwind/react";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/solid";
 import { User } from "../Types/index";
-import { signUpCall, googleSignUpCall } from "../Api/User";
+import { signUpCall, googleSignUpCall } from "../Redux/Api/User";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { GoogleLogin } from "@react-oauth/google";

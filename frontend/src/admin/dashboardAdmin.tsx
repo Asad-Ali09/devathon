@@ -7,7 +7,7 @@ import { Typography, Input, Button } from "@material-tailwind/react";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/solid";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { registerDoctor } from "../Api/User";
+import { registerDoctor } from "../Redux/Api/User";
 
 // Zod schema for doctor form validation
 const doctorSchema = z.object({
