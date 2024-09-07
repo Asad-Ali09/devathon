@@ -48,3 +48,13 @@ export interface Appointment extends Document {
     endTime: Date; // End time of the appointment
   };
 }
+
+export interface MedicalRecord extends Document {
+  patient: Schema.Types.ObjectId; // Reference to the patient
+  doctor: Schema.Types.ObjectId; // Reference to the doctor
+  imageUrls: string[]; // Array of image paths
+  testResults: string[]; // Array of test results (could be URLs or other identifiers)
+  prescriptions: string[]; // Array of prescription texts or URLs
+  createdAt: Date;
+  updatedAt: Date;
+}
