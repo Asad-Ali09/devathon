@@ -6,12 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography, Input, Button } from "@material-tailwind/react";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/solid";
 import { loginType, User } from "../Types/index";
-import { signInCall } from "../Redux/Api/User"; // Replace with your sign-in API call
+import { signInCall } from "../Api/UserCalls"; // Replace with your sign-in API call
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../Redux/store";
-
+import { useAppDispatch, useAppSelector } from "../hooks/ReduxHooks";
+import { setUser } from "../Redux/userSlice";
 // Zod schema for form validation
 const schema = z.object({
   email: z.string().min(1, "Username or Email is required"),
@@ -22,15 +21,7 @@ const Login = () => {
   const [passwordShown, setPasswordShown] = useState(false);
   const navigate = useNavigate();
   const togglePasswordVisibility = () => setPasswordShown((cur) => !cur);
-  const dispatch = useDispatch<AppDispatch>();
-  const { isLoggedIn } = useSelector<RootState>((state) => state.user);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate("/");
-    }
-  }, [isLoggedIn]);
-
+  //zod+react-hook-form
   const {
     register,
     handleSubmit,
@@ -38,38 +29,25 @@ const Login = () => {
   } = useForm<loginType>({
     resolver: zodResolver(schema),
   });
-
-  const mutation = useMutation({
+  //mutation function
+  const loginMutation = useMutation({
     mutationFn: signInCall,
-    onError: () => {
-      console.log("Error logging in");
-    },
   });
+  //redux
+  const dispatch = useAppDispatch();
 
-  const onSubmit = async (data: User) => {
+  const onSubmit = async (data: { email: string; password: string }) => {
     const toastId = toast.loading("Logging you in...");
-
-    try {
-      const response = await mutation.mutateAsync(data);
-      // Assuming `response.data` contains user information, including role
-      const userRole = response.data.role; // role can be doctor or patient
-
-      toast.success("Logged in successfully", { id: toastId });
-
-      // if (userRole === "doctor") {
-      //   navigate("/doctor-dashboard"); // Navigate to the doctor dashboard
-      // } else if (userRole === "patient") {
-      //   navigate("/patient-dashboard"); // Navigate to the patient dashboard
-      // }
-      // if()
-      // TwoStepCall();
-      // navigate("/two-factor");
-      dispatch(
-        signInCall({ email: data.email, password: data.password || "" })
-      );
-    } catch (error: any) {
-      toast.error("There was an error logging in", { id: toastId });
-    }
+    loginMutation.mutateAsync(data, {
+      onSuccess: (data: User) => {
+        toast.success("You have been logged in Successfully", { id: toastId });
+        dispatch(setUser(data));
+        navigate("/home");
+      },
+      onError: (data) => {
+        toast.error(`${data}`, { id: toastId });
+      },
+    });
   };
 
   return (

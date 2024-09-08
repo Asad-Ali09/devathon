@@ -1,15 +1,15 @@
 export type User = {
-  _id: string;
-  name: string;
-  email: string;
-  password?: string;
-  imageUrl?: string | null | File;
-  contactNumber: string;
-  dob: string;
   address: string;
+  contact: string;
+  dob: string;
+  email: string;
   gender: string;
-  role?: string;
+  image: string;
+  name: string;
+  role: string;
+  _id: string;
 };
+
 export type loginType = {
   email: string;
   password: string;
@@ -33,8 +33,6 @@ export type Doctor = {
     endTime: string;
   }[];
 };
-
-
 
 // {
 //   "name": "Rehan",

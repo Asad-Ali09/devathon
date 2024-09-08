@@ -1,59 +1,50 @@
-// src/redux/userSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Doctor, User } from "../Types/index";
-import { getDoctors, signUpCall } from "./Api/User";
+import { User } from "../Types/index";
 
-interface UserState {
-  doctors: Doctor[];
-  loading: boolean;
-  user: User | null;
-  error?: string;
-  isLoggedIn: boolean;
-}
-
-const initialState: UserState = {
-  doctors: [],
-  loading: false,
-  user: null,
-  error: undefined,
-  isLoggedIn: false,
+const initialState: User = {
+  _id: "",
+  name: "",
+  email: "",
+  image: "",
+  contact: "",
+  dob: "",
+  address: "",
+  gender: "",
+  role: "",
 };
 
 const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(getDoctors.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(
-        getDoctors.fulfilled,
-        (state, action: PayloadAction<Doctor[]>) => {
-          state.loading = false;
-          state.doctors = action.payload;
-        }
-      )
-      .addCase(getDoctors.rejected, (state, action) => {
-        state.loading = false;
-        // Ensure error is extracted properly
-        state.error = action.error.message || "Failed to fetch doctors";
-      })
-      .addCase(signUpCall.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(signUpCall.fulfilled, (state, action: PayloadAction<User>) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.isLoggedIn = true;
-      })
-      .addCase(signUpCall.rejected, (state, action) => {
-        state.loading = false;
-        // Ensure error is extracted properly
-        state.error = action.error.message || "Failed to sign up";
-      });
+  reducers: {
+    setUser(state, action: PayloadAction<User>) {
+      const { name, email, address, contact, image, dob, role, gender, _id } =
+        action.payload;
+      state._id = _id;
+      state.name = name;
+      state.email = email;
+      state.address = address;
+      state.contact = contact;
+      state.image = image;
+      state.dob = dob;
+      state.role = role;
+      state.gender = gender;
+    },
+    clearUser(state) {
+      state._id = "";
+      state.name = "";
+      state.email = "";
+      state.image = "";
+      state.contact = "";
+      state.dob = "";
+      state.address = "";
+      state.gender = "";
+      state.role = "";
+    },
   },
+  // extraReducers: (builder) => {},
 });
+
+export const { setUser, clearUser } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -3,7 +3,7 @@ import axios from "axios";
 const uploadImageToCloudinary = async (file: File): Promise<string | null> => {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET ?? "");
+  formData.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
 
   try {
     const response = await axios.post(
@@ -12,7 +12,6 @@ const uploadImageToCloudinary = async (file: File): Promise<string | null> => {
       }/image/upload`,
       formData,
       {
-        withCredentials: false,
         headers: {
           "Content-Type": "multipart/form-data",
         },

@@ -1,20 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Typography, Input, Button, useSelect } from "@material-tailwind/react";
+import { Typography, Input, Button } from "@material-tailwind/react";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/solid";
 import { User } from "../Types/index";
-import { signUpCall } from "../Redux/Api/User";
-import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../Redux/store";
-// import { GoogleLogin } from "@react-oauth/google";
+import { useMutation } from "@tanstack/react-query";
+import { signUpCall } from "../Api/UserCalls";
 
-// Zod schema for form validation
-// Zod schema for form validation
 const schema = z.object({
   name: z.string().min(3, "userName must be at least 3 characters long"),
   email: z.string().email("Invalid email address"),
@@ -29,22 +24,14 @@ const schema = z.object({
     required_error: "Gender is required",
   }),
 });
-
 export function SignUp() {
   const [passwordShown, setPasswordShown] = useState(false);
   const [image, setImage] = useState<File | null>(null);
-  const navigate = useNavigate();
   const togglePasswordVisibility = () => setPasswordShown((cur) => !cur);
-  const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector<RootState>((state) => state.user);
-  const { isLoggedIn } = useSelector<RootState>((state) => state.user);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate("/two-step");
-    }
-  }, [isLoggedIn]);
-
+  const signInMutation = useMutation({
+    mutationFn: signUpCall,
+  });
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -59,59 +46,14 @@ export function SignUp() {
       ...data,
       imageUrl: image,
     };
-    // try {
-    //
-    //   await mutation.mutateAsync(dataWithImage);
-    //   toast.success("Form submitted successfully", { id: toastId });
-    // } catch (error: any) {
-    //   toast.error("There was an error submitting the form", { id: toastId });
-    // }
-    console.log(dataWithImage);
-    const responsedata = await dispatch(signUpCall(dataWithImage));
-
-    if (responsedata.payload.status == 200) {
-      toast.success("Signed up successfully", { id: toastId });
-      navigate("/two-step");
-    } else {
-      toast.error(responsedata.payload.response.data.message);
-    }
+    signInMutation.mutateAsync(data, {
+      onError: (data) => toast.error(`${data}`, { id: toastId }),
+      onSuccess: () => {
+        toast.success("successfully Signed-In", { id: toastId });
+        navigate("/two-step");
+      },
+    });
   };
-
-  // const mutation = useMutation({
-  //   mutationFn: signUpCall,
-  //   onSuccess: () => {
-  //     console.log("Form submitted successfully");
-  //     navigate("/login");
-  //   },
-  //   onError: () => {
-  //     console.log("There is an error right now");
-  //   },
-  // });
-
-  // const googleMutation = useMutation({
-  //   mutationFn: googleSignUpCall,
-  //   onSuccess: () => {
-  //     console.log("Google sign-up successful");
-  //     toast.success("Signed up successfully");
-  //     navigate("/login");
-  //   },
-  //   onError: () => {
-  //     console.log("Error during Google sign-up");
-  //     toast.error("Error signing up");
-  //   },
-  // });
-
-  // const handleGoogleSignIn = async (response: { credential: string }) => {
-  //   const toastId = toast.loading("Signing you up...");
-  //   console.log(response);
-  //   try {
-  //     await googleMutation.mutateAsync(response.credential);
-  //     toast.success("Signed up successfully", { id: toastId });
-  //     navigate("/two-step");
-  //   } catch (error: any) {
-  //     toast.error("Error signing up", { id: toastId });
-  //   }
-  // };
 
   return (
     <section className="grid text-center h-screen items-center mt-10">
@@ -344,7 +286,7 @@ export function SignUp() {
           <Button
             size="lg"
             color="black"
-            className="w-full mt-8 mb-4"
+            className="w-full mt-8 mb-2"
             type="submit"
           >
             Sign Up
@@ -356,7 +298,7 @@ export function SignUp() {
           onSuccess={handleGoogleSignIn}
           onError={() => console.log("Google Login Error")}
         /> */}
-        <Typography className="mt-8 font-normal text-gray-500 text-center text-[16px]">
+        <Typography className="mt-1 font-normal text-gray-500 text-center text-[16px]">
           Already have an account?{" "}
           <Link to="/login" className="text-blue-500 hover:underline">
             Login

@@ -11,7 +11,7 @@ import {
   Button,
 } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
-import { getDoctors } from "../Redux/Api/User";
+import { getDoctors } from "../Api/UserCalls";
 import { AppDispatch, RootState } from "../Redux/store";
 import { Doctor } from "../Types";
 

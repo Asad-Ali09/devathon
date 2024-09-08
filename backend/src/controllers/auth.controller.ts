@@ -168,6 +168,7 @@ const verifyUser = async (
   res: Response
 ) => {
   const { code } = req.body;
+
   if (!code) throw new customError(400, "Invalid Verification Code");
 
   const verification = await verficationModel.findOne({

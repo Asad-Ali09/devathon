@@ -5,6 +5,7 @@ import TwoStep from "./Pages/TwoStep";
 import AddDoctor from "./admin/addDoctor";
 import { DoctorList } from "./Pages/DoctorsList";
 import axios from "axios";
+import Home from "./Pages/Home";
 
 axios.defaults.baseURL = "http://localhost:5000/api";
 axios.defaults.withCredentials = true;
@@ -16,6 +17,7 @@ const App = () => {
           <Route path="/" element={<SignUp />}></Route>
           <Route path="/login" element={<Login />}></Route>
           <Route path="/two-step" element={<TwoStep />}></Route>
+          <Route path="/home" element={<Home />}></Route>
           <Route path="/add/doctor" element={<AddDoctor />}></Route>
           <Route path="/doctors/list" element={<DoctorList />}></Route>
         </Routes>
