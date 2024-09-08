@@ -172,6 +172,7 @@ const verifyUser = async (
 
   const verification = await verficationModel.findOne({
     userId: req.user?._id,
+    code,
   });
   if (!verification) throw new customError(400, "Invalid Verification Code");
 
